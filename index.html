@@ -174,6 +174,7 @@
   }
   button.ghost:hover { border-color: var(--primary); color: var(--primary); }
 
+  /* 自定义祝福语面板 */
   .panel {
     max-width: 640px;
     width: 100%;
@@ -221,6 +222,7 @@
   .panel-actions { display: flex; gap: 0.6rem; margin-top: 0.6rem; flex-wrap: wrap; }
   .panel-actions button { padding: 0.55rem 1.1rem; font-size: 0.88rem; }
 
+  /* 贺卡预览模态 */
   .modal {
     position: fixed;
     inset: 0;
@@ -299,128 +301,6 @@
   }
   .pattern-chip:hover { transform: scale(1.08); }
 
-  .dynamic-stage {
-    position: fixed;
-    inset: 0;
-    z-index: 50;
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem;
-    background: radial-gradient(ellipse at top, #1a0d2e, #06030f);
-    text-align: center;
-  }
-  .dynamic-stage.show { display: flex; animation: fadeIn 0.6s both; }
-  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-  .dynamic-stage .dc-label {
-    font-size: clamp(0.8rem, 2vw, 1rem);
-    color: var(--primary);
-    letter-spacing: 0.5em;
-    opacity: 0;
-    animation: fadeUp 1s 0.3s forwards;
-  }
-  .dynamic-stage .dc-title {
-    font-size: clamp(3rem, 11vw, 7rem);
-    font-weight: 700;
-    line-height: 1.1;
-    margin-top: 1.5rem;
-    background: linear-gradient(135deg, #ffe4a0 0%, var(--primary) 50%, var(--accent) 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 4px 24px rgba(232,184,106,0.4));
-    opacity: 0;
-    transform: translateY(20px);
-    animation: dcTitle 1.2s 0.6s forwards;
-  }
-  @keyframes dcTitle { to { opacity: 1; transform: none; } }
-  .dynamic-stage .dc-subtitle {
-    font-size: clamp(0.95rem, 2.4vw, 1.3rem);
-    color: var(--soft);
-    margin-top: 0.8rem;
-    letter-spacing: 0.15em;
-    opacity: 0;
-    animation: fadeUp 1.5s 1.4s forwards;
-  }
-  .dynamic-stage .dc-divider {
-    width: 60px;
-    height: 1px;
-    background: var(--primary);
-    margin: 2.5rem 0;
-    opacity: 0;
-    transform: scaleX(0);
-    animation: dcLine 0.8s 1.8s forwards;
-  }
-  @keyframes dcLine { to { opacity: 1; transform: scaleX(1); } }
-  .dynamic-stage .dc-quote {
-    max-width: 640px;
-    font-size: clamp(1.15rem, 3vw, 1.7rem);
-    line-height: 2;
-    color: var(--ink);
-    font-weight: 300;
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  .dynamic-stage .dc-author {
-    margin-top: 1.5rem;
-    font-size: clamp(0.9rem, 2.2vw, 1.1rem);
-    color: var(--primary);
-    letter-spacing: 0.2em;
-    opacity: 0;
-    animation: fadeUp 1s 4s forwards;
-  }
-  .dynamic-stage .dc-footer {
-    position: absolute;
-    bottom: 2rem;
-    font-size: 0.78rem;
-    color: rgba(255,255,255,0.4);
-    opacity: 0;
-    animation: fadeIn 1s 5s forwards;
-  }
-  .dynamic-stage .dc-close {
-    position: absolute;
-    top: 1.5rem; right: 1.5rem;
-    width: 40px; height: 40px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.08);
-    border: 1px solid var(--border);
-    color: var(--ink);
-    font-size: 1.4rem;
-    cursor: pointer;
-    z-index: 5;
-  }
-  .char-anim {
-    display: inline-block;
-    opacity: 0;
-    transform: translateY(8px);
-    animation: charIn 0.4s forwards;
-  }
-  @keyframes charIn { to { opacity: 1; transform: none; } }
-
-  .wall-entry {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 0.9rem 1.1rem;
-    margin-bottom: 0.6rem;
-    text-align: left;
-    cursor: pointer;
-    transition: all 0.25s ease;
-  }
-  .wall-entry:hover { border-color: var(--primary); transform: translateX(2px); }
-  .wall-entry .we-text {
-    font-size: 0.95rem;
-    color: var(--ink);
-    line-height: 1.6;
-    margin-bottom: 0.4rem;
-  }
-  .wall-entry .we-meta {
-    font-size: 0.75rem;
-    color: var(--soft);
-    display: flex;
-    justify-content: space-between;
-  }
   .toast {
     position: fixed;
     bottom: 2rem;
@@ -448,6 +328,7 @@
   }
   .footer .heart { color: var(--accent); }
 
+  /* 隐藏拖拽光标提示等程序痕迹 */
   ::selection { background: var(--primary); color: var(--bg-grad-end); }
 </style>
 </head>
@@ -497,40 +378,18 @@
       <canvas id="cardCanvas" width="1080" height="1440"></canvas>
       <div class="modal-actions">
         <button id="downloadBtn">保存图片</button>
-        <button id="shareBtn">复制动态链接</button>
         <button class="ghost" id="recardBtn">换款式</button>
       </div>
     </div>
   </div>
 
-  <div class="dynamic-stage" id="dynamicStage">
-    <button class="dc-close" id="dcClose">×</button>
-    <div class="dc-label">致 · 恩 师</div>
-    <h1 class="dc-title">教师节快乐</h1>
-    <p class="dc-subtitle">桃李不言 · 下自成蹊</p>
-    <div class="dc-divider"></div>
-    <p class="dc-quote" id="dcQuote"></p>
-    <p class="dc-author" id="dcAuthor"></p>
-    <div class="dc-footer">把这份心意 · 转发给那位让你想念的人 ♡</div>
-  </div>
-
-  <div class="modal" id="wallModal">
-    <div class="modal-inner" style="max-width: 560px;">
-      <button class="close-x" id="closeWall" aria-label="关闭">×</button>
-      <div style="text-align:center; margin-bottom: 1rem;">
-        <div class="card-title" style="margin-bottom: 0.4rem;">祝 福 墙</div>
-        <div style="font-size: 0.78rem; color: var(--soft);">点击任意一条 · 重看那张贺卡</div>
-      </div>
-      <div id="wallList" style="max-height: 60vh; overflow-y: auto; padding: 0 0.3rem;"></div>
-    </div>
-  </div>
-
-  <footer class="footer">把这份心意 · 转发给那位让你想念的人 <span class="heart">♡</span> · <a href="#" id="openWall" style="color: var(--primary); text-decoration: none;">祝福墙</a></footer>
+  <footer class="footer">把这份心意 · 转发给那位让你想念的人 <span class="heart">♡</span></footer>
 </main>
 
 <div class="toast" id="toast"></div>
 
 <script>
+/* ============ 祝福语库 ============ */
 const quotes = [
   { text: "三尺讲台，一生情怀。您用粉笔书写春秋，用岁月培育栋梁。", author: "— 敬献" },
   { text: "一支粉笔，两袖清风，三尺讲台，四季耕耘，您是黑夜里的那盏灯。", author: "— 学子 敬上" },
@@ -578,6 +437,7 @@ document.querySelector("#nextBtn").addEventListener("click", () => {
 
 let autoTimer = setInterval(() => showQuote((idx + 1) % quotes.length), 6500);
 
+/* ============ 自定义祝福 ============ */
 const customPanel = document.querySelector("#customPanel");
 const customText = document.querySelector("#customText");
 const customAuthor = document.querySelector("#customAuthor");
@@ -601,6 +461,7 @@ document.querySelector("#useInCardBtn").addEventListener("click", () => {
   openCardModal(customText.value.trim(), customAuthor.value.trim());
 });
 
+/* ============ 花瓣 ============ */
 const petalsCanvas = document.querySelector("#petals");
 const pctx = petalsCanvas.getContext("2d");
 const fireworksCanvas = document.querySelector("#fireworks");
@@ -648,9 +509,10 @@ const drawPetal = (p) => {
   pctx.restore();
 };
 
+/* ============ 烟花系统（拖尾升级） ============ */
 const fireworks = [];
 const particles = [];
-const sparks = [];
+const sparks = [];          // 上升时的火花尾迹
 const FW_COLORS = ["#ff6b9d", "#e8b86a", "#ffe4a0", "#ff8fa3", "#7ed7c1", "#a18cd1", "#f9a826", "#ffd1dc"];
 
 const launchFirework = (x, y) => {
@@ -668,10 +530,12 @@ const launchFirework = (x, y) => {
 };
 
 const explode = (fw) => {
+  // 主爆炸：环形 + 散射
   const count = 80 + Math.floor(Math.random() * 50);
   const baseAngle = Math.random() * Math.PI * 2;
   for (let i = 0; i < count; i++) {
     const angle = baseAngle + (i / count) * Math.PI * 2;
+    // 速度用正弦让分布更自然（外圈快、内圈慢）
     const speed = 2 + Math.sin(i / count * Math.PI) * 2.5 + Math.random() * 2.5;
     particles.push({
       x: fw.x,
@@ -685,9 +549,10 @@ const explode = (fw) => {
       gravity: 0.045 + Math.random() * 0.02,
       drag: 0.985 + Math.random() * 0.01,
       trail: [],
-      canSecond: Math.random() < 0.18,
+      canSecond: Math.random() < 0.18,   // 18% 概率二次爆开
     });
   }
+  // 中心闪光
   sparks.push({ x: fw.x, y: fw.y, life: 1, decay: 0.05, size: 18, color: "#ffffff" });
 };
 
@@ -715,9 +580,11 @@ const secondBurst = (p) => {
 
 const MAX_PARTICLES = 350;
 const animate = () => {
+  // 拖尾背景：每帧叠加一层半透明底色，制造渐隐余烬
   fctx.fillStyle = "rgba(15, 10, 31, 0.16)";
   fctx.fillRect(0, 0, fireworksCanvas.width, fireworksCanvas.height);
 
+  // 上升烟花
   fctx.lineCap = "round";
   for (let i = fireworks.length - 1; i >= 0; i--) {
     const fw = fireworks[i];
@@ -726,6 +593,7 @@ const animate = () => {
     fw.y += fw.vy;
     fw.vy += 0.06;
 
+    // 拖尾绘制：一条路径走完所有线段，减少 stroke 调用
     if (fw.trail.length > 1) {
       fctx.beginPath();
       fctx.moveTo(fw.trail[0].x, fw.trail[0].y);
@@ -738,10 +606,12 @@ const animate = () => {
       fctx.stroke();
     }
     fctx.globalAlpha = 1;
+    // 头部亮点（不用 shadowBlur，性能更好）
     fctx.fillStyle = "#ffffff";
     fctx.beginPath();
     fctx.arc(fw.x, fw.y, 2.5, 0, Math.PI * 2);
     fctx.fill();
+    // 头部外圈柔光（一个更大的低 alpha 圆，模拟辉光）
     fctx.fillStyle = fw.color;
     fctx.globalAlpha = 0.4;
     fctx.beginPath();
@@ -749,6 +619,7 @@ const animate = () => {
     fctx.fill();
     fctx.globalAlpha = 1;
 
+    // 上升火花散落
     fw.sparkTimer++;
     if (fw.sparkTimer % 3 === 0 && sparks.length < 80) {
       sparks.push({
@@ -769,6 +640,7 @@ const animate = () => {
     }
   }
 
+  // 中心闪光（不带 shadowBlur，用大圆叠加模拟）
   for (let i = sparks.length - 1; i >= 0; i--) {
     const s = sparks[i];
     s.x = s.x + (s.vx || 0);
@@ -788,11 +660,13 @@ const animate = () => {
   }
   fctx.globalAlpha = 1;
 
+  // 粒子总数上限：超出按生命值最小的先剔除
   if (particles.length > MAX_PARTICLES) {
     particles.sort((a, b) => b.life - a.life);
     particles.length = MAX_PARTICLES;
   }
 
+  // 粒子（拖尾 + 重力 + 二次爆炸，去掉 shadowBlur）
   for (let i = particles.length - 1; i >= 0; i--) {
     const p = particles[i];
     p.trail.push({ x: p.x, y: p.y });
@@ -805,6 +679,7 @@ const animate = () => {
 
     if (p.life <= 0) { particles.splice(i, 1); continue; }
 
+    // 粒子拖尾：一条路径完成
     if (p.trail.length > 1) {
       fctx.beginPath();
       fctx.moveTo(p.trail[0].x, p.trail[0].y);
@@ -817,6 +692,7 @@ const animate = () => {
       fctx.stroke();
     }
 
+    // 粒子主体（用外圈低 alpha 圆模拟辉光，不用 shadowBlur）
     fctx.globalAlpha = p.life * 0.35;
     fctx.fillStyle = p.color;
     fctx.beginPath();
@@ -828,6 +704,7 @@ const animate = () => {
     fctx.arc(p.x, p.y, p.size * (0.6 + p.life * 0.4), 0, Math.PI * 2);
     fctx.fill();
 
+    // 二次爆开
     if (p.canSecond && p.life < 0.45) {
       secondBurst(p);
       p.canSecond = false;
@@ -835,6 +712,7 @@ const animate = () => {
   }
   fctx.globalAlpha = 1;
 
+  // 花瓣
   pctx.clearRect(0, 0, petalsCanvas.width, petalsCanvas.height);
   for (let i = petals.length - 1; i >= 0; i--) {
     const p = petals[i];
@@ -852,6 +730,7 @@ const animate = () => {
 };
 animate();
 
+/* ============ 自动 + 点击发射 ============ */
 setTimeout(() => {
   for (let i = 0; i < 4; i++) setTimeout(() => launchFirework(), i * 700);
 }, 800);
@@ -871,6 +750,7 @@ document.addEventListener("touchstart", (e) => {
   launchFirework(t.clientX);
 }, { passive: true });
 
+/* ============ 贺卡生成 ============ */
 const cardModal = document.querySelector("#cardModal");
 const cardCanvas = document.querySelector("#cardCanvas");
 const cctx = cardCanvas.getContext("2d");
@@ -924,24 +804,28 @@ const generateCard = (customText, customAuthor) => {
   const H = cardCanvas.height;
   const pat = PATTERNS[currentPattern];
 
+  // 背景渐变
   const grad = cctx.createLinearGradient(0, 0, 0, H);
   grad.addColorStop(0, pat.bg1);
   grad.addColorStop(1, pat.bg2);
   cctx.fillStyle = grad;
   cctx.fillRect(0, 0, W, H);
 
+  // 光晕
   const halo = cctx.createRadialGradient(W / 2, H * 0.32, 30, W / 2, H * 0.32, W * 0.55);
   halo.addColorStop(0, "rgba(255,228,160,0.22)");
   halo.addColorStop(1, "rgba(255,228,160,0)");
   cctx.fillStyle = halo;
   cctx.fillRect(0, 0, W, H);
 
+  // 边框
   cctx.strokeStyle = pat.accent;
   cctx.lineWidth = 4;
   cctx.strokeRect(40, 40, W - 80, H - 80);
   cctx.lineWidth = 1;
   cctx.strokeRect(56, 56, W - 112, H - 112);
 
+  // 装饰花瓣（随机散布）
   for (let i = 0; i < 28; i++) {
     const px = 80 + Math.random() * (W - 160);
     const py = 80 + Math.random() * (H - 160);
@@ -949,12 +833,14 @@ const generateCard = (customText, customAuthor) => {
     drawPetalOnCard(cctx, px, py, ps, pat.petal, Math.random() * Math.PI * 2);
   }
 
+  // 顶部标识
   cctx.fillStyle = pat.accent;
   cctx.font = "600 38px 'Songti SC', 'STSong', 'Noto Serif SC', serif";
   cctx.textAlign = "center";
   cctx.letterSpacing = "8px";
   cctx.fillText("致 · 恩 师", W / 2, 180);
 
+  // 主标题
   const titleGrad = cctx.createLinearGradient(0, 220, 0, 360);
   titleGrad.addColorStop(0, "#ffe4a0");
   titleGrad.addColorStop(0.5, pat.accent);
@@ -963,12 +849,14 @@ const generateCard = (customText, customAuthor) => {
   cctx.font = "700 120px 'Songti SC', 'STSong', serif";
   cctx.fillText("教师节快乐", W / 2, 330);
 
+  // 副标题
   cctx.fillStyle = pat.ink;
   cctx.globalAlpha = 0.75;
   cctx.font = "400 32px 'Songti SC', serif";
   cctx.fillText("桃李不言 · 下自成蹊", W / 2, 400);
   cctx.globalAlpha = 1;
 
+  // 分隔线
   cctx.strokeStyle = pat.accent;
   cctx.lineWidth = 1.5;
   cctx.beginPath();
@@ -976,6 +864,7 @@ const generateCard = (customText, customAuthor) => {
   cctx.lineTo(W * 0.7, 450);
   cctx.stroke();
 
+  // 正文祝福
   const text = customText || quotes[idx].text;
   cctx.fillStyle = pat.ink;
   cctx.textAlign = "left";
@@ -984,6 +873,7 @@ const generateCard = (customText, customAuthor) => {
   const maxWidth = W - 280;
   const used = wrapText(cctx, text, startX, 540, maxWidth, 64, 5);
 
+  // 落款
   const authorText = customAuthor
     ? "— " + customAuthor
     : (quotes[idx].author || "— 您的学生 敬上");
@@ -992,20 +882,24 @@ const generateCard = (customText, customAuthor) => {
   cctx.textAlign = "right";
   cctx.fillText(authorText, W - 140, 540 + used + 50);
 
+  // 底部日期
   cctx.fillStyle = pat.ink;
   cctx.globalAlpha = 0.5;
   cctx.font = "300 26px 'Songti SC', serif";
   cctx.textAlign = "center";
+  const d = new Date();
   const dateStr = `二〇二六年九月十日 · 教师节`;
   cctx.fillText(dateStr, W / 2, H - 110);
   cctx.globalAlpha = 1;
 
+  // 底部点缀
   cctx.fillStyle = pat.accent;
   cctx.font = "400 28px serif";
   cctx.fillText("♡ ✿ ♡", W / 2, H - 70);
 };
 
 const openCardModal = (customText, customAuthor) => {
+  // 暂存待生成的祝福语
   pendingText = customText;
   pendingAuthor = customAuthor;
   renderPatternPicker();
@@ -1035,6 +929,7 @@ const renderPatternPicker = () => {
 
 document.querySelector("#cardBtn").addEventListener("click", () => openCardModal());
 document.querySelector("#recardBtn").addEventListener("click", () => {
+  // 随机切换到下一个款式，给点惊喜
   currentPattern = (currentPattern + 1 + Math.floor(Math.random() * (PATTERNS.length - 1))) % PATTERNS.length;
   renderPatternPicker();
   generateCard(pendingText, pendingAuthor);
@@ -1044,163 +939,20 @@ cardModal.addEventListener("click", (e) => {
   if (e.target === cardModal) cardModal.classList.remove("show");
 });
 
-document.querySelector("#downloadBtn").addEventListener("click", () => {
-  const link = document.createElement("a");
-  link.download = "教师节贺卡.png";
-  link.href = cardCanvas.toDataURL("image/png");
-  link.click();
-});
-
-const dynamicStage = document.querySelector("#dynamicStage");
-const dcQuote = document.querySelector("#dcQuote");
-const dcAuthor = document.querySelector("#dcAuthor");
+/* ============ 轻提示 ============ */
 const toast = document.querySelector("#toast");
-
 const showToast = (msg) => {
   toast.textContent = msg;
   toast.classList.add("show");
   setTimeout(() => toast.classList.remove("show"), 2000);
 };
 
-const b64encode = (str) => {
-  try {
-    return btoa(unescape(encodeURIComponent(str)))
-      .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-  } catch { return ""; }
-};
-const b64decode = (str) => {
-  try {
-    str = str.replace(/-/g, "+").replace(/_/g, "/");
-    return decodeURIComponent(escape(atob(str)));
-  } catch { return ""; }
-};
-
-const WALL_KEY = "teacher_day_wall_v1";
-
-const loadWall = () => {
-  try { return JSON.parse(localStorage.getItem(WALL_KEY) || "[]"); }
-  catch { return []; }
-};
-const saveWall = (arr) => localStorage.setItem(WALL_KEY, JSON.stringify(arr));
-
-const addToWall = (text, author, pattern) => {
-  const wall = loadWall();
-  if (wall.some(e => e.text === text && e.author === author)) return;
-  wall.push({
-    text, author,
-    pattern: pattern ?? currentPattern,
-    time: Date.now(),
-  });
-  if (wall.length > 50) wall.splice(0, wall.length - 50);
-  saveWall(wall);
-};
-
-const renderCharByChar = (el, text, startDelay = 0) => {
-  el.innerHTML = "";
-  const chars = text.split("");
-  chars.forEach((ch, i) => {
-    const span = document.createElement("span");
-    span.className = "char-anim";
-    span.textContent = ch === " " ? "\u00A0" : ch;
-    span.style.animationDelay = `${startDelay + i * 0.06}s`;
-    el.appendChild(span);
-  });
-};
-
-const playDynamic = (text, author, pattern) => {
-  if (pattern != null && PATTERNS[pattern]) {
-    currentPattern = pattern;
-    renderPatternPicker();
-  }
-  dcQuote.style.animation = "none";
-  dcAuthor.style.animation = "none";
-  void dcQuote.offsetWidth;
-  dcQuote.style.animation = "";
-  dcAuthor.style.animation = "";
-  renderCharByChar(dcQuote, text, 2.0);
-  dcAuthor.textContent = author || "— 敬献";
-  dynamicStage.classList.add("show");
-  generateCard(text, author);
-  setTimeout(() => launchFirework(), 400);
-  setTimeout(() => launchFirework(), 1200);
-  setTimeout(() => launchFirework(), 2000);
-};
-
-document.querySelector("#dcClose").addEventListener("click", () => {
-  dynamicStage.classList.remove("show");
-});
-document.querySelector("#shareBtn").addEventListener("click", () => {
-  const text = pendingText || quotes[idx].text;
-  const author = pendingAuthor
-    ? "— " + pendingAuthor
-    : (quotes[idx].author || "— 敬献");
-  const hash = `#b=${b64encode(text)}&a=${b64encode(author)}&p=${currentPattern}`;
-  const url = location.origin + location.pathname + hash;
-  navigator.clipboard.writeText(url).then(() => {
-    showToast("已复制 · 把链接发给朋友即可");
-  }).catch(() => {
-    const ta = document.createElement("textarea");
-    ta.value = url;
-    document.body.appendChild(ta);
-    ta.select();
-    try { document.execCommand("copy"); showToast("已复制 · 把链接发给朋友即可"); }
-    catch { showToast("复制失败 · 请手动复制：" + url); }
-    document.body.removeChild(ta);
-  });
-});
-
-const checkSharedUrl = () => {
-  const hash = location.hash.slice(1);
-  if (!hash) return;
-  const params = new URLSearchParams(hash);
-  const b = params.get("b");
-  const a = params.get("a");
-  const p = params.get("p");
-  if (!b) return;
-  const text = b64decode(b);
-  const author = b64decode(a) || "— 敬献";
-  const pattern = p ? parseInt(p, 10) : 0;
-  if (!text) return;
-  addToWall(text, author, pattern);
-  setTimeout(() => playDynamic(text, author, pattern), 1200);
-};
-checkSharedUrl();
-
-const wallModal = document.querySelector("#wallModal");
-const wallList = document.querySelector("#wallList");
-
-const renderWall = () => {
-  const wall = loadWall();
-  wallList.innerHTML = "";
-  if (wall.length === 0) {
-    wallList.innerHTML = `<div style="text-align:center; padding: 2rem; color: var(--soft); font-size: 0.9rem;">还没有人给你写过祝福<br><br>把动态链接发给朋友 · 他们写完发回来 · 就会出现在这里</div>`;
-    return;
-  }
-  wall.slice().reverse().forEach((e) => {
-    const item = document.createElement("div");
-    item.className = "wall-entry";
-    const date = new Date(e.time);
-    const timeStr = `${date.getMonth() + 1}月${date.getDate()}日 ${String(date.getHours()).padStart(2,"0")}:${String(date.getMinutes()).padStart(2,"0")}`;
-    item.innerHTML = `
-      <div class="we-text">${e.text.replace(/</g, "&lt;")}</div>
-      <div class="we-meta"><span>${e.author || "— 敬献"}</span><span>${timeStr}</span></div>
-    `;
-    item.addEventListener("click", () => {
-      wallModal.classList.remove("show");
-      playDynamic(e.text, e.author, e.pattern);
-    });
-    wallList.appendChild(item);
-  });
-};
-
-document.querySelector("#openWall").addEventListener("click", (e) => {
-  e.preventDefault();
-  renderWall();
-  wallModal.classList.add("show");
-});
-document.querySelector("#closeWall").addEventListener("click", () => wallModal.classList.remove("show"));
-wallModal.addEventListener("click", (e) => {
-  if (e.target === wallModal) wallModal.classList.remove("show");
+document.querySelector("#downloadBtn").addEventListener("click", () => {
+  const link = document.createElement("a");
+  link.download = "教师节贺卡.png";
+  link.href = cardCanvas.toDataURL("image/png");
+  link.click();
+  showToast("贺卡已保存 · 把图片发给老师吧");
 });
 </script>
 </body>
