@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>教师节快乐 · 桃李满天下</title>
+<style>
+  :root {
+    --bg-grad-start: #2c1a3e;
+    --bg-grad-end: #0f0a1f;
+    --primary: #e8b86a;
+    --accent: #ff6b9d;
+    --ink: #fef6e4;
+    --soft: rgba(255, 246, 228, 0.72);
+    --card-bg: rgba(255, 255, 255, 0.06);
+    --border: rgba(255, 255, 255, 0.14);
+    --shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: "Songti SC", "STSong", "Noto Serif SC", "Microsoft YaHei", serif;
+    background: radial-gradient(ellipse at top, var(--bg-grad-start), var(--bg-grad-end));
+    color: var(--ink);
+    position: relative;
+    overflow-x: hidden;
+  }
+  canvas#petals, canvas#fireworks {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+  }
+  #petals { z-index: 2; }
+  #fireworks { z-index: 1; }
+
+  .scene {
+    position: relative;
+    z-index: 3;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem clamp(1rem, 4vw, 4rem);
+    text-align: center;
+  }
+
+  .title-wrap { margin-bottom: clamp(2rem, 5vh, 3rem); }
+  .label {
+    font-size: clamp(0.85rem, 2vw, 1rem);
+    letter-spacing: 0.4em;
+    color: var(--primary);
+    margin-bottom: 1rem;
+    opacity: 0.85;
+  }
+  .title {
+    font-size: clamp(2.6rem, 9vw, 5.5rem);
+    font-weight: 700;
+    line-height: 1.1;
+    background: linear-gradient(135deg, #ffe4a0 0%, var(--primary) 45%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 4px 24px rgba(232, 184, 106, 0.3);
+    animation: titleFade 1.8s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  }
+  .subtitle {
+    font-size: clamp(0.95rem, 2.2vw, 1.3rem);
+    color: var(--soft);
+    margin-top: 0.8rem;
+    letter-spacing: 0.08em;
+    animation: fadeUp 2s 0.5s both;
+  }
+  @keyframes titleFade {
+    from { opacity: 0; transform: translateY(-24px) scale(0.95); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: none; }
+  }
+
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: clamp(1.4rem, 4vw, 2.2rem) clamp(1.8rem, 5vw, 3rem);
+    max-width: 640px;
+    width: 100%;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: var(--shadow);
+    animation: fadeUp 1.6s 0.9s both;
+  }
+  .card-title {
+    font-size: clamp(1rem, 2.4vw, 1.25rem);
+    color: var(--primary);
+    letter-spacing: 0.25em;
+    margin-bottom: 1rem;
+  }
+  .quote {
+    font-size: clamp(1.05rem, 2.6vw, 1.5rem);
+    line-height: 1.85;
+    color: var(--ink);
+    font-weight: 300;
+    min-height: 6em;
+    transition: opacity 0.5s ease;
+  }
+  .quote::before, .quote::after {
+    content: "「";
+    color: var(--accent);
+    font-size: 1.3em;
+    margin-right: 0.2em;
+  }
+  .quote::after {
+    content: "」";
+    margin-left: 0.2em;
+    margin-right: 0;
+  }
+  .author {
+    margin-top: 1rem;
+    font-size: clamp(0.8rem, 2vw, 1rem);
+    color: var(--soft);
+    text-align: right;
+  }
+  .dots {
+    display: flex;
+    justify-content: center;
+    gap: 0.6rem;
+    margin-top: 1.4rem;
+    flex-wrap: wrap;
+  }
+  .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.25);
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  .dot.active {
+    background: var(--primary);
+    width: 20px;
+    border-radius: 4px;
+  }
+
+  .actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: clamp(1.5rem, 4vh, 2.5rem);
+    flex-wrap: wrap;
+    justify-content: center;
+    animation: fadeUp 2s 1.3s both;
+  }
+  button {
+    font-family: inherit;
+    font-size: clamp(0.9rem, 2.2vw, 1.05rem);
+    letter-spacing: 0.1em;
+    padding: 0.75rem 1.8rem;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    color: var(--bg-grad-start);
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    box-shadow: 0 6px 20px rgba(232, 184, 106, 0.4);
+  }
+  button:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(232, 184, 106, 0.55); }
+  button.ghost {
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--border);
+    box-shadow: none;
+  }
+  button.ghost:hover { border-color: var(--primary); color: var(--primary); }
+
+  .panel {
+    max-width: 640px;
+    width: 100%;
+    margin-top: 1.2rem;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.4rem 1.6rem;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    display: none;
+    animation: fadeUp 0.4s both;
+  }
+  .panel.show { display: block; }
+  .panel h3 {
+    font-size: clamp(0.95rem, 2.2vw, 1.1rem);
+    color: var(--primary);
+    letter-spacing: 0.15em;
+    margin-bottom: 0.9rem;
+    font-weight: 500;
+  }
+  .field { margin-bottom: 0.8rem; text-align: left; }
+  .field label {
+    display: block;
+    font-size: 0.82rem;
+    color: var(--soft);
+    margin-bottom: 0.4rem;
+    letter-spacing: 0.08em;
+  }
+  .field input, .field textarea {
+    width: 100%;
+    background: rgba(0,0,0,0.25);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.65rem 0.85rem;
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.25s ease;
+    resize: vertical;
+  }
+  .field input:focus, .field textarea:focus { border-color: var(--primary); }
+  .field textarea { min-height: 80px; line-height: 1.6; }
+  .panel-actions { display: flex; gap: 0.6rem; margin-top: 0.6rem; flex-wrap: wrap; }
+  .panel-actions button { padding: 0.55rem 1.1rem; font-size: 0.88rem; }
+
+  .modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.78);
+    z-index: 99;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    padding: 1.5rem;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  .modal.show { display: flex; animation: fadeUp 0.3s both; }
+  .modal-inner {
+    position: relative;
+    max-width: 540px;
+    width: 100%;
+    max-height: 92vh;
+    overflow: auto;
+  }
+  .modal-inner canvas {
+    width: 100%;
+    border-radius: 14px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    display: block;
+  }
+  .modal-actions {
+    display: flex;
+    gap: 0.7rem;
+    justify-content: center;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+  }
+  .close-x {
+    position: absolute;
+    top: -0.5rem;
+    right: -0.5rem;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: var(--bg-grad-start);
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .footer {
+    margin-top: 2.5rem;
+    font-size: 0.82rem;
+    color: rgba(255, 255, 255, 0.42);
+    text-align: center;
+    letter-spacing: 0.1em;
+  }
+  .footer .heart { color: var(--accent); }
+
+  ::selection { background: var(--primary); color: var(--bg-grad-end); }
+</style>
+</head>
+<body>
+<canvas id="fireworks"></canvas>
+<canvas id="petals"></canvas>
+<main class="scene">
+  <header class="title-wrap">
+    <div class="label">致 · 恩 师</div>
+    <h1 class="title">教师节快乐</h1>
+    <p class="subtitle">桃李不言 · 下自成蹊</p>
+  </header>
+
+  <article class="card">
+    <div class="card-title">心 里 的 话</div>
+    <p class="quote" id="quoteText">三尺讲台，一生情怀。您用粉笔书写春秋，用岁月培育栋梁。</p>
+    <p class="author" id="quoteAuthor">— 敬献</p>
+    <div class="dots" id="dots"></div>
+  </article>
+
+  <nav class="actions">
+    <button id="cardBtn">送上贺卡</button>
+    <button class="ghost" id="customBtn">写一句心里话</button>
+    <button class="ghost" id="nextBtn">换一句</button>
+  </nav>
+
+  <section class="panel" id="customPanel">
+    <h3>写 一 句 心 里 话</h3>
+    <div class="field">
+      <label>对老师说</label>
+      <textarea id="customText" placeholder="例如：谢谢您那年把我的作文当范文读，那是我后来敢写下去的全部理由。" maxlength="120"></textarea>
+    </div>
+    <div class="field">
+      <label>落款（可留空）</label>
+      <input id="customAuthor" type="text" placeholder="您的名字 / 班级" maxlength="30">
+    </div>
+    <div class="panel-actions">
+      <button id="addQuoteBtn">加入轮播</button>
+      <button class="ghost" id="useInCardBtn">用这句做贺卡</button>
+    </div>
+  </section>
+
+  <div class="modal" id="cardModal">
+    <div class="modal-inner">
+      <button class="close-x" id="closeModal" aria-label="关闭">×</button>
+      <canvas id="cardCanvas" width="1080" height="1440"></canvas>
+      <div class="modal-actions">
+        <button id="downloadBtn">保存贺卡</button>
+        <button class="ghost" id="recardBtn">重新生成</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">把这份心意 · 转发给那位让你想念的人 <span class="heart">♡</span></footer>
+</main>
+
+<script>
+const quotes = [
+  { text: "三尺讲台，一生情怀。您用粉笔书写春秋，用岁月培育栋梁。", author: "— 敬献" },
+  { text: "一支粉笔，两袖清风，三尺讲台，四季耕耘，您是黑夜里的那盏灯。", author: "— 学子 敬上" },
+  { text: "师者，所以传道授业解惑也。一日为师，终生为念。", author: "— 韩愈《师说》化用" },
+  { text: "您种下的不是花，是星辰大海。每个学生的远方，都站着您的守望。", author: "— 致引路人" },
+  { text: "春蚕到死丝方尽，蜡炬成灰泪始干。师恩如海，浩瀚无言。", author: "— 李商隐《无题》" },
+  { text: "桃李满天下，何用更堂前种花。您的名字写在风中，写在所有长大的孩子身上。", author: "— 白居易意" },
+  { text: "黑板擦掉了字迹，擦不掉您留下的光。那些被您点过头的孩子，后来都成了星星。", author: "— 学子 敬上" },
+  { text: "您没有教我如何成功，您只是教我如何成为一个完整的人。这比所有第一名都重要。", author: "— 远方来信" },
+];
+
+let idx = 0;
+const quoteText = document.querySelector("#quoteText");
+const quoteAuthor = document.querySelector("#quoteAuthor");
+const dotsWrap = document.querySelector("#dots");
+
+const renderDots = () => {
+  dotsWrap.innerHTML = "";
+  quotes.forEach((_, i) => {
+    const d = document.createElement("span");
+    d.className = "dot" + (i === idx ? " active" : "");
+    d.addEventListener("click", () => showQuote(i));
+    dotsWrap.appendChild(d);
+  });
+};
+
+const showQuote = (i) => {
+  if (i === idx) return;
+  idx = i;
+  quoteText.style.opacity = 0;
+  quoteAuthor.style.opacity = 0;
+  setTimeout(() => {
+    quoteText.textContent = quotes[i].text;
+    quoteAuthor.textContent = quotes[i].author;
+    quoteText.style.opacity = 1;
+    quoteAuthor.style.opacity = 1;
+  }, 300);
+  renderDots();
+};
+renderDots();
+
+document.querySelector("#nextBtn").addEventListener("click", () => {
+  showQuote((idx + 1) % quotes.length);
+});
+
+let autoTimer = setInterval(() => showQuote((idx + 1) % quotes.length), 6500);
+
+const customPanel = document.querySelector("#customPanel");
+const customText = document.querySelector("#customText");
+const customAuthor = document.querySelector("#customAuthor");
+
+document.querySelector("#customBtn").addEventListener("click", () => {
+  customPanel.classList.toggle("show");
+  if (customPanel.classList.contains("show")) customText.focus();
+});
+
+document.querySelector("#addQuoteBtn").addEventListener("click", () => {
+  const t = customText.value.trim();
+  if (!t) return;
+  quotes.push({ text: t, author: customAuthor.value.trim() ? "— " + customAuthor.value.trim() : "— 您的学生" });
+  showQuote(quotes.length - 1);
+  customText.value = "";
+  customAuthor.value = "";
+  customPanel.classList.remove("show");
+});
+
+document.querySelector("#useInCardBtn").addEventListener("click", () => {
+  openCardModal(customText.value.trim(), customAuthor.value.trim());
+});
+
+const petalsCanvas = document.querySelector("#petals");
+const pctx = petalsCanvas.getContext("2d");
+const fireworksCanvas = document.querySelector("#fireworks");
+const fctx = fireworksCanvas.getContext("2d");
+
+const resize = () => {
+  [petalsCanvas, fireworksCanvas].forEach(c => {
+    c.width = window.innerWidth;
+    c.height = window.innerHeight;
+  });
+};
+window.addEventListener("resize", resize);
+resize();
+
+const PETAL_COLORS = ["#ffb7c5", "#ff8fa3", "#ffd4a3", "#e8b86a", "#ffe4a0"];
+const petals = [];
+
+const makePetal = (x) => ({
+  x: x ?? Math.random() * petalsCanvas.width,
+  y: -20,
+  size: 6 + Math.random() * 8,
+  speed: 0.6 + Math.random() * 1.4,
+  drift: (Math.random() - 0.5) * 1.6,
+  swing: Math.random() * Math.PI * 2,
+  swingSpeed: 0.02 + Math.random() * 0.03,
+  rot: Math.random() * Math.PI * 2,
+  rotSpeed: (Math.random() - 0.5) * 0.04,
+  color: PETAL_COLORS[Math.floor(Math.random() * PETAL_COLORS.length)],
+  alpha: 0.7 + Math.random() * 0.3,
+});
+
+for (let i = 0; i < 60; i++) petals.push(makePetal(Math.random() * petalsCanvas.width));
+
+const drawPetal = (p) => {
+  pctx.save();
+  pctx.translate(p.x, p.y);
+  pctx.rotate(p.rot);
+  pctx.globalAlpha = p.alpha;
+  pctx.fillStyle = p.color;
+  pctx.beginPath();
+  pctx.moveTo(0, -p.size);
+  pctx.bezierCurveTo(p.size * 0.6, -p.size * 0.8, p.size * 0.5, p.size * 0.4, 0, p.size);
+  pctx.bezierCurveTo(-p.size * 0.5, p.size * 0.4, -p.size * 0.6, -p.size * 0.8, 0, -p.size);
+  pctx.fill();
+  pctx.restore();
+};
+
+const fireworks = [];
+const particles = [];
+const sparks = [];
+const FW_COLORS = ["#ff6b9d", "#e8b86a", "#ffe4a0", "#ff8fa3", "#7ed7c1", "#a18cd1", "#f9a826", "#ffd1dc"];
+
+const launchFirework = (x, y) => {
+  const targetY = y ?? (fireworksCanvas.height * (0.16 + Math.random() * 0.28));
+  const startX = x ?? (fireworksCanvas.width * (0.15 + Math.random() * 0.7));
+  fireworks.push({
+    x: startX,
+    y: fireworksCanvas.height,
+    vy: -(fireworksCanvas.height - targetY) * 0.013 - 7.5,
+    targetY: targetY,
+    color: FW_COLORS[Math.floor(Math.random() * FW_COLORS.length)],
+    trail: [],
+    sparkTimer: 0,
+  });
+};
+
+const explode = (fw) => {
+  const count = 80 + Math.floor(Math.random() * 50);
+  const baseAngle = Math.random() * Math.PI * 2;
+  for (let i = 0; i < count; i++) {
+    const angle = baseAngle + (i / count) * Math.PI * 2;
+    const speed = 2 + Math.sin(i / count * Math.PI) * 2.5 + Math.random() * 2.5;
+    particles.push({
+      x: fw.x,
+      y: fw.y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      life: 1,
+      decay: 0.008 + Math.random() * 0.012,
+      color: fw.color,
+      size: 1.6 + Math.random() * 2.2,
+      gravity: 0.045 + Math.random() * 0.02,
+      drag: 0.985 + Math.random() * 0.01,
+      trail: [],
+      canSecond: Math.random() < 0.18,
+    });
+  }
+  sparks.push({ x: fw.x, y: fw.y, life: 1, decay: 0.05, size: 18, color: "#ffffff" });
+};
+
+const secondBurst = (p) => {
+  const count = 12 + Math.floor(Math.random() * 8);
+  for (let i = 0; i < count; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = 1 + Math.random() * 2;
+    particles.push({
+      x: p.x,
+      y: p.y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      life: 0.7,
+      decay: 0.02 + Math.random() * 0.02,
+      color: p.color,
+      size: 1.2 + Math.random() * 1.4,
+      gravity: 0.04,
+      drag: 0.985,
+      trail: [],
+      canSecond: false,
+    });
+  }
+};
+
+const animate = () => {
+  fctx.fillStyle = "rgba(15, 10, 31, 0.16)";
+  fctx.fillRect(0, 0, fireworksCanvas.width, fireworksCanvas.height);
+
+  for (let i = fireworks.length - 1; i >= 0; i--) {
+    const fw = fireworks[i];
+    fw.trail.push({ x: fw.x, y: fw.y, a: 1 });
+    if (fw.trail.length > 18) fw.trail.shift();
+    fw.y += fw.vy;
+    fw.vy += 0.06;
+
+    fctx.lineCap = "round";
+    for (let j = 1; j < fw.trail.length; j++) {
+      const t0 = fw.trail[j - 1];
+      const t1 = fw.trail[j];
+      const k = j / fw.trail.length;
+      fctx.strokeStyle = fw.color;
+      fctx.globalAlpha = k * 0.7;
+      fctx.lineWidth = 0.5 + k * 2.5;
+      fctx.beginPath();
+      fctx.moveTo(t0.x, t0.y);
+      fctx.lineTo(t1.x, t1.y);
+      fctx.stroke();
+    }
+    fctx.globalAlpha = 1;
+    fctx.fillStyle = "#fff";
+    fctx.shadowColor = fw.color;
+    fctx.shadowBlur = 14;
+    fctx.beginPath();
+    fctx.arc(fw.x, fw.y, 2.2, 0, Math.PI * 2);
+    fctx.fill();
+    fctx.shadowBlur = 0;
+
+    fw.sparkTimer++;
+    if (fw.sparkTimer % 2 === 0) {
+      sparks.push({
+        x: fw.x + (Math.random() - 0.5) * 4,
+        y: fw.y + 6,
+        vx: (Math.random() - 0.5) * 1.2,
+        vy: 0.5 + Math.random() * 1.2,
+        life: 1,
+        decay: 0.04 + Math.random() * 0.03,
+        size: 1 + Math.random() * 1.4,
+        color: fw.color,
+      });
+    }
+
+    if (fw.y <= fw.targetY || fw.vy >= 0) {
+      explode(fw);
+      fireworks.splice(i, 1);
+    }
+  }
+
+  for (let i = sparks.length - 1; i >= 0; i--) {
+    const s = sparks[i];
+    s.x = s.x + (s.vx || 0);
+    s.y = s.y + (s.vy || 0);
+    s.life -= s.decay;
+    if (s.life <= 0) { sparks.splice(i, 1); continue; }
+    fctx.globalAlpha = s.life;
+    fctx.fillStyle = s.color;
+    fctx.shadowColor = s.color;
+    fctx.shadowBlur = 12;
+    fctx.beginPath();
+    fctx.arc(s.x, s.y, s.size * s.life, 0, Math.PI * 2);
+    fctx.fill();
+  }
+  fctx.shadowBlur = 0;
+  fctx.globalAlpha = 1;
+
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.trail.push({ x: p.x, y: p.y });
+    if (p.trail.length > 6) p.trail.shift();
+    p.x += p.vx;
+    p.y += p.vy;
+    p.vy += p.gravity;
+    p.vx *= p.drag;
+    p.life -= p.decay;
+
+    if (p.life <= 0) { particles.splice(i, 1); continue; }
+
+    for (let j = 1; j < p.trail.length; j++) {
+      const t0 = p.trail[j - 1];
+      const t1 = p.trail[j];
+      const k = j / p.trail.length;
+      fctx.strokeStyle = p.color;
+      fctx.globalAlpha = p.life * k * 0.5;
+      fctx.lineWidth = p.size * k;
+      fctx.beginPath();
+      fctx.moveTo(t0.x, t0.y);
+      fctx.lineTo(t1.x, t1.y);
+      fctx.stroke();
+    }
+
+    fctx.globalAlpha = p.life;
+    fctx.fillStyle = p.color;
+    fctx.shadowColor = p.color;
+    fctx.shadowBlur = 10;
+    fctx.beginPath();
+    fctx.arc(p.x, p.y, p.size * (0.6 + p.life * 0.4), 0, Math.PI * 2);
+    fctx.fill();
+
+    if (p.canSecond && p.life < 0.45) {
+      secondBurst(p);
+      p.canSecond = false;
+    }
+  }
+  fctx.shadowBlur = 0;
+  fctx.globalAlpha = 1;
+
+  pctx.clearRect(0, 0, petalsCanvas.width, petalsCanvas.height);
+  for (let i = petals.length - 1; i >= 0; i--) {
+    const p = petals[i];
+    p.swing += p.swingSpeed;
+    p.x += p.drift + Math.sin(p.swing) * 0.6;
+    p.y += p.speed;
+    p.rot += p.rotSpeed;
+    drawPetal(p);
+    if (p.y > petalsCanvas.height + 20) {
+      petals[i] = makePetal();
+    }
+  }
+
+  requestAnimationFrame(animate);
+};
+animate();
+
+setTimeout(() => {
+  for (let i = 0; i < 4; i++) setTimeout(() => launchFirework(), i * 700);
+}, 800);
+
+document.addEventListener("click", (e) => {
+  if (e.target.closest("button")) return;
+  if (e.target.closest(".panel")) return;
+  if (e.target.closest(".modal")) return;
+  launchFirework(e.clientX);
+});
+
+document.addEventListener("touchstart", (e) => {
+  if (e.target.closest("button")) return;
+  if (e.target.closest(".panel")) return;
+  if (e.target.closest(".modal")) return;
+  const t = e.touches[0];
+  launchFirework(t.clientX);
+}, { passive: true });
+
+const cardModal = document.querySelector("#cardModal");
+const cardCanvas = document.querySelector("#cardCanvas");
+const cctx = cardCanvas.getContext("2d");
+
+const PATTERNS = [
+  { bg1: "#3a1f5d", bg2: "#1a0d2e", accent: "#e8b86a", ink: "#fef6e4", petal: "#ff8fa3" },
+  { bg1: "#5d1f3a", bg2: "#2e0d1a", accent: "#ffd4a3", ink: "#fff0e6", petal: "#ffb7c5" },
+  { bg1: "#1f3a5d", bg2: "#0d1a2e", accent: "#ffe4a0", ink: "#e6f0ff", petal: "#a18cd1" },
+  { bg1: "#5d3a1f", bg2: "#2e1a0d", accent: "#ffd4a3", ink: "#fff0e6", petal: "#ff8fa3" },
+];
+
+const wrapText = (ctx, text, x, y, maxWidth, lineHeight, maxLines = 99) => {
+  const chars = text.split("");
+  let line = "";
+  let lines = [];
+  for (const ch of chars) {
+    const test = line + ch;
+    if (ctx.measureText(test).width > maxWidth && line.length > 0) {
+      lines.push(line);
+      line = ch;
+      if (lines.length >= maxLines - 1) break;
+    } else {
+      line = test;
+    }
+  }
+  if (lines.length < maxLines) lines.push(line);
+  lines = lines.slice(0, maxLines);
+  lines.forEach((l, i) => ctx.fillText(l, x, y + i * lineHeight));
+  return lines.length * lineHeight;
+};
+
+const drawPetalOnCard = (ctx, x, y, size, color, rot) => {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(rot);
+  ctx.fillStyle = color;
+  ctx.globalAlpha = 0.85;
+  ctx.beginPath();
+  ctx.moveTo(0, -size);
+  ctx.bezierCurveTo(size * 0.6, -size * 0.8, size * 0.5, size * 0.4, 0, size);
+  ctx.bezierCurveTo(-size * 0.5, size * 0.4, -size * 0.6, -size * 0.8, 0, -size);
+  ctx.fill();
+  ctx.restore();
+};
+
+const generateCard = (customText, customAuthor) => {
+  const W = cardCanvas.width;
+  const H = cardCanvas.height;
+  const pat = PATTERNS[Math.floor(Math.random() * PATTERNS.length)];
+
+  const grad = cctx.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, pat.bg1);
+  grad.addColorStop(1, pat.bg2);
+  cctx.fillStyle = grad;
+  cctx.fillRect(0, 0, W, H);
+
+  const halo = cctx.createRadialGradient(W / 2, H * 0.32, 30, W / 2, H * 0.32, W * 0.55);
+  halo.addColorStop(0, "rgba(255,228,160,0.22)");
+  halo.addColorStop(1, "rgba(255,228,160,0)");
+  cctx.fillStyle = halo;
+  cctx.fillRect(0, 0, W, H);
+
+  cctx.strokeStyle = pat.accent;
+  cctx.lineWidth = 4;
+  cctx.strokeRect(40, 40, W - 80, H - 80);
+  cctx.lineWidth = 1;
+  cctx.strokeRect(56, 56, W - 112, H - 112);
+
+  for (let i = 0; i < 28; i++) {
+    const px = 80 + Math.random() * (W - 160);
+    const py = 80 + Math.random() * (H - 160);
+    const ps = 10 + Math.random() * 16;
+    drawPetalOnCard(cctx, px, py, ps, pat.petal, Math.random() * Math.PI * 2);
+  }
+
+  cctx.fillStyle = pat.accent;
+  cctx.font = "600 38px 'Songti SC', 'STSong', 'Noto Serif SC', serif";
+  cctx.textAlign = "center";
+  cctx.letterSpacing = "8px";
+  cctx.fillText("致 · 恩 师", W / 2, 180);
+
+  const titleGrad = cctx.createLinearGradient(0, 220, 0, 360);
+  titleGrad.addColorStop(0, "#ffe4a0");
+  titleGrad.addColorStop(0.5, pat.accent);
+  titleGrad.addColorStop(1, pat.petal);
+  cctx.fillStyle = titleGrad;
+  cctx.font = "700 120px 'Songti SC', 'STSong', serif";
+  cctx.fillText("教师节快乐", W / 2, 330);
+
+  cctx.fillStyle = pat.ink;
+  cctx.globalAlpha = 0.75;
+  cctx.font = "400 32px 'Songti SC', serif";
+  cctx.fillText("桃李不言 · 下自成蹊", W / 2, 400);
+  cctx.globalAlpha = 1;
+
+  cctx.strokeStyle = pat.accent;
+  cctx.lineWidth = 1.5;
+  cctx.beginPath();
+  cctx.moveTo(W * 0.3, 450);
+  cctx.lineTo(W * 0.7, 450);
+  cctx.stroke();
+
+  const text = customText || quotes[idx].text;
+  cctx.fillStyle = pat.ink;
+  cctx.textAlign = "left";
+  cctx.font = "400 40px 'Songti SC', serif";
+  const startX = 140;
+  const maxWidth = W - 280;
+  const used = wrapText(cctx, text, startX, 540, maxWidth, 64, 5);
+
+  const authorText = customAuthor
+    ? "— " + customAuthor
+    : (quotes[idx].author || "— 您的学生 敬上");
+  cctx.fillStyle = pat.accent;
+  cctx.font = "300 32px 'Songti SC', serif";
+  cctx.textAlign = "right";
+  cctx.fillText(authorText, W - 140, 540 + used + 50);
+
+  cctx.fillStyle = pat.ink;
+  cctx.globalAlpha = 0.5;
+  cctx.font = "300 26px 'Songti SC', serif";
+  cctx.textAlign = "center";
+  const dateStr = `二〇二六年九月十日 · 教师节`;
+  cctx.fillText(dateStr, W / 2, H - 110);
+  cctx.globalAlpha = 1;
+
+  cctx.fillStyle = pat.accent;
+  cctx.font = "400 28px serif";
+  cctx.fillText("♡ ✿ ♡", W / 2, H - 70);
+};
+
+const openCardModal = (customText, customAuthor) => {
+  generateCard(customText, customAuthor);
+  cardModal.classList.add("show");
+  setTimeout(() => launchFirework(), 100);
+  setTimeout(() => launchFirework(), 500);
+};
+
+document.querySelector("#cardBtn").addEventListener("click", () => openCardModal());
+document.querySelector("#recardBtn").addEventListener("click", () => generateCard());
+document.querySelector("#closeModal").addEventListener("click", () => cardModal.classList.remove("show"));
+cardModal.addEventListener("click", (e) => {
+  if (e.target === cardModal) cardModal.classList.remove("show");
+});
+
+document.querySelector("#downloadBtn").addEventListener("click", () => {
+  const link = document.createElement("a");
+  link.download = "教师节贺卡.png";
+  link.href = cardCanvas.toDataURL("image/png");
+  link.click();
+});
+</script>
+</body>
+</html>
