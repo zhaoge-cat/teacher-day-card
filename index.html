@@ -268,7 +268,36 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    z-index: 5;
   }
+  .pattern-picker {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+  }
+  .pattern-chip {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .pattern-chip::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.35), transparent 60%);
+  }
+  .pattern-chip.active {
+    border-color: #fff;
+    transform: scale(1.1);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+  }
+  .pattern-chip:hover { transform: scale(1.08); }
 
   .footer {
     margin-top: 2.5rem;
@@ -324,6 +353,7 @@
   <div class="modal" id="cardModal">
     <div class="modal-inner">
       <button class="close-x" id="closeModal" aria-label="关闭">×</button>
+      <div class="pattern-picker" id="patternPicker"></div>
       <canvas id="cardCanvas" width="1080" height="1440"></canvas>
       <div class="modal-actions">
         <button id="downloadBtn">保存贺卡</button>
@@ -518,48 +548,51 @@ const secondBurst = (p) => {
   }
 };
 
+const MAX_PARTICLES = 350;
 const animate = () => {
   fctx.fillStyle = "rgba(15, 10, 31, 0.16)";
   fctx.fillRect(0, 0, fireworksCanvas.width, fireworksCanvas.height);
 
+  fctx.lineCap = "round";
   for (let i = fireworks.length - 1; i >= 0; i--) {
     const fw = fireworks[i];
-    fw.trail.push({ x: fw.x, y: fw.y, a: 1 });
-    if (fw.trail.length > 18) fw.trail.shift();
+    fw.trail.push({ x: fw.x, y: fw.y });
+    if (fw.trail.length > 14) fw.trail.shift();
     fw.y += fw.vy;
     fw.vy += 0.06;
 
-    fctx.lineCap = "round";
-    for (let j = 1; j < fw.trail.length; j++) {
-      const t0 = fw.trail[j - 1];
-      const t1 = fw.trail[j];
-      const k = j / fw.trail.length;
-      fctx.strokeStyle = fw.color;
-      fctx.globalAlpha = k * 0.7;
-      fctx.lineWidth = 0.5 + k * 2.5;
+    if (fw.trail.length > 1) {
       fctx.beginPath();
-      fctx.moveTo(t0.x, t0.y);
-      fctx.lineTo(t1.x, t1.y);
+      fctx.moveTo(fw.trail[0].x, fw.trail[0].y);
+      for (let j = 1; j < fw.trail.length; j++) {
+        fctx.lineTo(fw.trail[j].x, fw.trail[j].y);
+      }
+      fctx.strokeStyle = fw.color;
+      fctx.globalAlpha = 0.6;
+      fctx.lineWidth = 2.5;
       fctx.stroke();
     }
     fctx.globalAlpha = 1;
-    fctx.fillStyle = "#fff";
-    fctx.shadowColor = fw.color;
-    fctx.shadowBlur = 14;
+    fctx.fillStyle = "#ffffff";
     fctx.beginPath();
-    fctx.arc(fw.x, fw.y, 2.2, 0, Math.PI * 2);
+    fctx.arc(fw.x, fw.y, 2.5, 0, Math.PI * 2);
     fctx.fill();
-    fctx.shadowBlur = 0;
+    fctx.fillStyle = fw.color;
+    fctx.globalAlpha = 0.4;
+    fctx.beginPath();
+    fctx.arc(fw.x, fw.y, 5, 0, Math.PI * 2);
+    fctx.fill();
+    fctx.globalAlpha = 1;
 
     fw.sparkTimer++;
-    if (fw.sparkTimer % 2 === 0) {
+    if (fw.sparkTimer % 3 === 0 && sparks.length < 80) {
       sparks.push({
         x: fw.x + (Math.random() - 0.5) * 4,
         y: fw.y + 6,
         vx: (Math.random() - 0.5) * 1.2,
         vy: 0.5 + Math.random() * 1.2,
         life: 1,
-        decay: 0.04 + Math.random() * 0.03,
+        decay: 0.045 + Math.random() * 0.03,
         size: 1 + Math.random() * 1.4,
         color: fw.color,
       });
@@ -577,21 +610,28 @@ const animate = () => {
     s.y = s.y + (s.vy || 0);
     s.life -= s.decay;
     if (s.life <= 0) { sparks.splice(i, 1); continue; }
-    fctx.globalAlpha = s.life;
+    fctx.globalAlpha = s.life * 0.5;
     fctx.fillStyle = s.color;
-    fctx.shadowColor = s.color;
-    fctx.shadowBlur = 12;
+    fctx.beginPath();
+    fctx.arc(s.x, s.y, s.size * s.life * 2.5, 0, Math.PI * 2);
+    fctx.fill();
+    fctx.globalAlpha = s.life;
+    fctx.fillStyle = "#fff";
     fctx.beginPath();
     fctx.arc(s.x, s.y, s.size * s.life, 0, Math.PI * 2);
     fctx.fill();
   }
-  fctx.shadowBlur = 0;
   fctx.globalAlpha = 1;
+
+  if (particles.length > MAX_PARTICLES) {
+    particles.sort((a, b) => b.life - a.life);
+    particles.length = MAX_PARTICLES;
+  }
 
   for (let i = particles.length - 1; i >= 0; i--) {
     const p = particles[i];
     p.trail.push({ x: p.x, y: p.y });
-    if (p.trail.length > 6) p.trail.shift();
+    if (p.trail.length > 5) p.trail.shift();
     p.x += p.vx;
     p.y += p.vy;
     p.vy += p.gravity;
@@ -600,23 +640,25 @@ const animate = () => {
 
     if (p.life <= 0) { particles.splice(i, 1); continue; }
 
-    for (let j = 1; j < p.trail.length; j++) {
-      const t0 = p.trail[j - 1];
-      const t1 = p.trail[j];
-      const k = j / p.trail.length;
-      fctx.strokeStyle = p.color;
-      fctx.globalAlpha = p.life * k * 0.5;
-      fctx.lineWidth = p.size * k;
+    if (p.trail.length > 1) {
       fctx.beginPath();
-      fctx.moveTo(t0.x, t0.y);
-      fctx.lineTo(t1.x, t1.y);
+      fctx.moveTo(p.trail[0].x, p.trail[0].y);
+      for (let j = 1; j < p.trail.length; j++) {
+        fctx.lineTo(p.trail[j].x, p.trail[j].y);
+      }
+      fctx.strokeStyle = p.color;
+      fctx.globalAlpha = p.life * 0.4;
+      fctx.lineWidth = p.size * 0.8;
       fctx.stroke();
     }
 
-    fctx.globalAlpha = p.life;
+    fctx.globalAlpha = p.life * 0.35;
     fctx.fillStyle = p.color;
-    fctx.shadowColor = p.color;
-    fctx.shadowBlur = 10;
+    fctx.beginPath();
+    fctx.arc(p.x, p.y, p.size * 2.2, 0, Math.PI * 2);
+    fctx.fill();
+    fctx.globalAlpha = p.life;
+    fctx.fillStyle = "#fff";
     fctx.beginPath();
     fctx.arc(p.x, p.y, p.size * (0.6 + p.life * 0.4), 0, Math.PI * 2);
     fctx.fill();
@@ -626,7 +668,6 @@ const animate = () => {
       p.canSecond = false;
     }
   }
-  fctx.shadowBlur = 0;
   fctx.globalAlpha = 1;
 
   pctx.clearRect(0, 0, petalsCanvas.width, petalsCanvas.height);
@@ -670,11 +711,14 @@ const cardCanvas = document.querySelector("#cardCanvas");
 const cctx = cardCanvas.getContext("2d");
 
 const PATTERNS = [
-  { bg1: "#3a1f5d", bg2: "#1a0d2e", accent: "#e8b86a", ink: "#fef6e4", petal: "#ff8fa3" },
-  { bg1: "#5d1f3a", bg2: "#2e0d1a", accent: "#ffd4a3", ink: "#fff0e6", petal: "#ffb7c5" },
-  { bg1: "#1f3a5d", bg2: "#0d1a2e", accent: "#ffe4a0", ink: "#e6f0ff", petal: "#a18cd1" },
-  { bg1: "#5d3a1f", bg2: "#2e1a0d", accent: "#ffd4a3", ink: "#fff0e6", petal: "#ff8fa3" },
+  { name: "紫夜", bg1: "#3a1f5d", bg2: "#1a0d2e", accent: "#e8b86a", ink: "#fef6e4", petal: "#ff8fa3" },
+  { name: "酒红", bg1: "#5d1f3a", bg2: "#2e0d1a", accent: "#ffd4a3", ink: "#fff0e6", petal: "#ffb7c5" },
+  { name: "海蓝", bg1: "#1f3a5d", bg2: "#0d1a2e", accent: "#ffe4a0", ink: "#e6f0ff", petal: "#a18cd1" },
+  { name: "暖棕", bg1: "#5d3a1f", bg2: "#2e1a0d", accent: "#ffd4a3", ink: "#fff0e6", petal: "#ff8fa3" },
+  { name: "墨绿", bg1: "#1f3a2e", bg2: "#0d1a14", accent: "#e8d86a", ink: "#f4f6e4", petal: "#ffb7c5" },
+  { name: "靛紫", bg1: "#2a1f5d", bg2: "#0d0a2e", accent: "#ffd4a3", ink: "#e6e8ff", petal: "#ff8fa3" },
 ];
+let currentPattern = 0;
 
 const wrapText = (ctx, text, x, y, maxWidth, lineHeight, maxLines = 99) => {
   const chars = text.split("");
@@ -713,7 +757,7 @@ const drawPetalOnCard = (ctx, x, y, size, color, rot) => {
 const generateCard = (customText, customAuthor) => {
   const W = cardCanvas.width;
   const H = cardCanvas.height;
-  const pat = PATTERNS[Math.floor(Math.random() * PATTERNS.length)];
+  const pat = PATTERNS[currentPattern];
 
   const grad = cctx.createLinearGradient(0, 0, 0, H);
   grad.addColorStop(0, pat.bg1);
@@ -797,14 +841,39 @@ const generateCard = (customText, customAuthor) => {
 };
 
 const openCardModal = (customText, customAuthor) => {
-  generateCard(customText, customAuthor);
+  pendingText = customText;
+  pendingAuthor = customAuthor;
+  renderPatternPicker();
+  generateCard(pendingText, pendingAuthor);
   cardModal.classList.add("show");
-  setTimeout(() => launchFirework(), 100);
-  setTimeout(() => launchFirework(), 500);
+};
+
+let pendingText = null;
+let pendingAuthor = null;
+
+const renderPatternPicker = () => {
+  const wrap = document.querySelector("#patternPicker");
+  wrap.innerHTML = "";
+  PATTERNS.forEach((p, i) => {
+    const chip = document.createElement("div");
+    chip.className = "pattern-chip" + (i === currentPattern ? " active" : "");
+    chip.style.background = `linear-gradient(135deg, ${p.bg1}, ${p.bg2})`;
+    chip.title = p.name;
+    chip.addEventListener("click", () => {
+      currentPattern = i;
+      renderPatternPicker();
+      generateCard(pendingText, pendingAuthor);
+    });
+    wrap.appendChild(chip);
+  });
 };
 
 document.querySelector("#cardBtn").addEventListener("click", () => openCardModal());
-document.querySelector("#recardBtn").addEventListener("click", () => generateCard());
+document.querySelector("#recardBtn").addEventListener("click", () => {
+  currentPattern = (currentPattern + 1 + Math.floor(Math.random() * (PATTERNS.length - 1))) % PATTERNS.length;
+  renderPatternPicker();
+  generateCard(pendingText, pendingAuthor);
+});
 document.querySelector("#closeModal").addEventListener("click", () => cardModal.classList.remove("show"));
 cardModal.addEventListener("click", (e) => {
   if (e.target === cardModal) cardModal.classList.remove("show");
