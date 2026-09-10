@@ -299,6 +299,146 @@
   }
   .pattern-chip:hover { transform: scale(1.08); }
 
+  .dynamic-stage {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background: radial-gradient(ellipse at top, #1a0d2e, #06030f);
+    text-align: center;
+  }
+  .dynamic-stage.show { display: flex; animation: fadeIn 0.6s both; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .dynamic-stage .dc-label {
+    font-size: clamp(0.8rem, 2vw, 1rem);
+    color: var(--primary);
+    letter-spacing: 0.5em;
+    opacity: 0;
+    animation: fadeUp 1s 0.3s forwards;
+  }
+  .dynamic-stage .dc-title {
+    font-size: clamp(3rem, 11vw, 7rem);
+    font-weight: 700;
+    line-height: 1.1;
+    margin-top: 1.5rem;
+    background: linear-gradient(135deg, #ffe4a0 0%, var(--primary) 50%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 4px 24px rgba(232,184,106,0.4));
+    opacity: 0;
+    transform: translateY(20px);
+    animation: dcTitle 1.2s 0.6s forwards;
+  }
+  @keyframes dcTitle { to { opacity: 1; transform: none; } }
+  .dynamic-stage .dc-subtitle {
+    font-size: clamp(0.95rem, 2.4vw, 1.3rem);
+    color: var(--soft);
+    margin-top: 0.8rem;
+    letter-spacing: 0.15em;
+    opacity: 0;
+    animation: fadeUp 1.5s 1.4s forwards;
+  }
+  .dynamic-stage .dc-divider {
+    width: 60px;
+    height: 1px;
+    background: var(--primary);
+    margin: 2.5rem 0;
+    opacity: 0;
+    transform: scaleX(0);
+    animation: dcLine 0.8s 1.8s forwards;
+  }
+  @keyframes dcLine { to { opacity: 1; transform: scaleX(1); } }
+  .dynamic-stage .dc-quote {
+    max-width: 640px;
+    font-size: clamp(1.15rem, 3vw, 1.7rem);
+    line-height: 2;
+    color: var(--ink);
+    font-weight: 300;
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  .dynamic-stage .dc-author {
+    margin-top: 1.5rem;
+    font-size: clamp(0.9rem, 2.2vw, 1.1rem);
+    color: var(--primary);
+    letter-spacing: 0.2em;
+    opacity: 0;
+    animation: fadeUp 1s 4s forwards;
+  }
+  .dynamic-stage .dc-footer {
+    position: absolute;
+    bottom: 2rem;
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.4);
+    opacity: 0;
+    animation: fadeIn 1s 5s forwards;
+  }
+  .dynamic-stage .dc-close {
+    position: absolute;
+    top: 1.5rem; right: 1.5rem;
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid var(--border);
+    color: var(--ink);
+    font-size: 1.4rem;
+    cursor: pointer;
+    z-index: 5;
+  }
+  .char-anim {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(8px);
+    animation: charIn 0.4s forwards;
+  }
+  @keyframes charIn { to { opacity: 1; transform: none; } }
+
+  .wall-entry {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 0.9rem 1.1rem;
+    margin-bottom: 0.6rem;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+  .wall-entry:hover { border-color: var(--primary); transform: translateX(2px); }
+  .wall-entry .we-text {
+    font-size: 0.95rem;
+    color: var(--ink);
+    line-height: 1.6;
+    margin-bottom: 0.4rem;
+  }
+  .wall-entry .we-meta {
+    font-size: 0.75rem;
+    color: var(--soft);
+    display: flex;
+    justify-content: space-between;
+  }
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: rgba(0,0,0,0.85);
+    color: var(--ink);
+    padding: 0.7rem 1.4rem;
+    border-radius: 30px;
+    border: 1px solid var(--border);
+    font-size: 0.9rem;
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 200;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
   .footer {
     margin-top: 2.5rem;
     font-size: 0.82rem;
@@ -356,14 +496,39 @@
       <div class="pattern-picker" id="patternPicker"></div>
       <canvas id="cardCanvas" width="1080" height="1440"></canvas>
       <div class="modal-actions">
-        <button id="downloadBtn">保存贺卡</button>
-        <button class="ghost" id="recardBtn">重新生成</button>
+        <button id="downloadBtn">保存图片</button>
+        <button id="shareBtn">复制动态链接</button>
+        <button class="ghost" id="recardBtn">换款式</button>
       </div>
     </div>
   </div>
 
-  <footer class="footer">把这份心意 · 转发给那位让你想念的人 <span class="heart">♡</span></footer>
+  <div class="dynamic-stage" id="dynamicStage">
+    <button class="dc-close" id="dcClose">×</button>
+    <div class="dc-label">致 · 恩 师</div>
+    <h1 class="dc-title">教师节快乐</h1>
+    <p class="dc-subtitle">桃李不言 · 下自成蹊</p>
+    <div class="dc-divider"></div>
+    <p class="dc-quote" id="dcQuote"></p>
+    <p class="dc-author" id="dcAuthor"></p>
+    <div class="dc-footer">把这份心意 · 转发给那位让你想念的人 ♡</div>
+  </div>
+
+  <div class="modal" id="wallModal">
+    <div class="modal-inner" style="max-width: 560px;">
+      <button class="close-x" id="closeWall" aria-label="关闭">×</button>
+      <div style="text-align:center; margin-bottom: 1rem;">
+        <div class="card-title" style="margin-bottom: 0.4rem;">祝 福 墙</div>
+        <div style="font-size: 0.78rem; color: var(--soft);">点击任意一条 · 重看那张贺卡</div>
+      </div>
+      <div id="wallList" style="max-height: 60vh; overflow-y: auto; padding: 0 0.3rem;"></div>
+    </div>
+  </div>
+
+  <footer class="footer">把这份心意 · 转发给那位让你想念的人 <span class="heart">♡</span> · <a href="#" id="openWall" style="color: var(--primary); text-decoration: none;">祝福墙</a></footer>
 </main>
+
+<div class="toast" id="toast"></div>
 
 <script>
 const quotes = [
@@ -884,6 +1049,158 @@ document.querySelector("#downloadBtn").addEventListener("click", () => {
   link.download = "教师节贺卡.png";
   link.href = cardCanvas.toDataURL("image/png");
   link.click();
+});
+
+const dynamicStage = document.querySelector("#dynamicStage");
+const dcQuote = document.querySelector("#dcQuote");
+const dcAuthor = document.querySelector("#dcAuthor");
+const toast = document.querySelector("#toast");
+
+const showToast = (msg) => {
+  toast.textContent = msg;
+  toast.classList.add("show");
+  setTimeout(() => toast.classList.remove("show"), 2000);
+};
+
+const b64encode = (str) => {
+  try {
+    return btoa(unescape(encodeURIComponent(str)))
+      .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  } catch { return ""; }
+};
+const b64decode = (str) => {
+  try {
+    str = str.replace(/-/g, "+").replace(/_/g, "/");
+    return decodeURIComponent(escape(atob(str)));
+  } catch { return ""; }
+};
+
+const WALL_KEY = "teacher_day_wall_v1";
+
+const loadWall = () => {
+  try { return JSON.parse(localStorage.getItem(WALL_KEY) || "[]"); }
+  catch { return []; }
+};
+const saveWall = (arr) => localStorage.setItem(WALL_KEY, JSON.stringify(arr));
+
+const addToWall = (text, author, pattern) => {
+  const wall = loadWall();
+  if (wall.some(e => e.text === text && e.author === author)) return;
+  wall.push({
+    text, author,
+    pattern: pattern ?? currentPattern,
+    time: Date.now(),
+  });
+  if (wall.length > 50) wall.splice(0, wall.length - 50);
+  saveWall(wall);
+};
+
+const renderCharByChar = (el, text, startDelay = 0) => {
+  el.innerHTML = "";
+  const chars = text.split("");
+  chars.forEach((ch, i) => {
+    const span = document.createElement("span");
+    span.className = "char-anim";
+    span.textContent = ch === " " ? "\u00A0" : ch;
+    span.style.animationDelay = `${startDelay + i * 0.06}s`;
+    el.appendChild(span);
+  });
+};
+
+const playDynamic = (text, author, pattern) => {
+  if (pattern != null && PATTERNS[pattern]) {
+    currentPattern = pattern;
+    renderPatternPicker();
+  }
+  dcQuote.style.animation = "none";
+  dcAuthor.style.animation = "none";
+  void dcQuote.offsetWidth;
+  dcQuote.style.animation = "";
+  dcAuthor.style.animation = "";
+  renderCharByChar(dcQuote, text, 2.0);
+  dcAuthor.textContent = author || "— 敬献";
+  dynamicStage.classList.add("show");
+  generateCard(text, author);
+  setTimeout(() => launchFirework(), 400);
+  setTimeout(() => launchFirework(), 1200);
+  setTimeout(() => launchFirework(), 2000);
+};
+
+document.querySelector("#dcClose").addEventListener("click", () => {
+  dynamicStage.classList.remove("show");
+});
+document.querySelector("#shareBtn").addEventListener("click", () => {
+  const text = pendingText || quotes[idx].text;
+  const author = pendingAuthor
+    ? "— " + pendingAuthor
+    : (quotes[idx].author || "— 敬献");
+  const hash = `#b=${b64encode(text)}&a=${b64encode(author)}&p=${currentPattern}`;
+  const url = location.origin + location.pathname + hash;
+  navigator.clipboard.writeText(url).then(() => {
+    showToast("已复制 · 把链接发给朋友即可");
+  }).catch(() => {
+    const ta = document.createElement("textarea");
+    ta.value = url;
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand("copy"); showToast("已复制 · 把链接发给朋友即可"); }
+    catch { showToast("复制失败 · 请手动复制：" + url); }
+    document.body.removeChild(ta);
+  });
+});
+
+const checkSharedUrl = () => {
+  const hash = location.hash.slice(1);
+  if (!hash) return;
+  const params = new URLSearchParams(hash);
+  const b = params.get("b");
+  const a = params.get("a");
+  const p = params.get("p");
+  if (!b) return;
+  const text = b64decode(b);
+  const author = b64decode(a) || "— 敬献";
+  const pattern = p ? parseInt(p, 10) : 0;
+  if (!text) return;
+  addToWall(text, author, pattern);
+  setTimeout(() => playDynamic(text, author, pattern), 1200);
+};
+checkSharedUrl();
+
+const wallModal = document.querySelector("#wallModal");
+const wallList = document.querySelector("#wallList");
+
+const renderWall = () => {
+  const wall = loadWall();
+  wallList.innerHTML = "";
+  if (wall.length === 0) {
+    wallList.innerHTML = `<div style="text-align:center; padding: 2rem; color: var(--soft); font-size: 0.9rem;">还没有人给你写过祝福<br><br>把动态链接发给朋友 · 他们写完发回来 · 就会出现在这里</div>`;
+    return;
+  }
+  wall.slice().reverse().forEach((e) => {
+    const item = document.createElement("div");
+    item.className = "wall-entry";
+    const date = new Date(e.time);
+    const timeStr = `${date.getMonth() + 1}月${date.getDate()}日 ${String(date.getHours()).padStart(2,"0")}:${String(date.getMinutes()).padStart(2,"0")}`;
+    item.innerHTML = `
+      <div class="we-text">${e.text.replace(/</g, "&lt;")}</div>
+      <div class="we-meta"><span>${e.author || "— 敬献"}</span><span>${timeStr}</span></div>
+    `;
+    item.addEventListener("click", () => {
+      wallModal.classList.remove("show");
+      playDynamic(e.text, e.author, e.pattern);
+    });
+    wallList.appendChild(item);
+  });
+};
+
+document.querySelector("#openWall").addEventListener("click", (e) => {
+  e.preventDefault();
+  renderWall();
+  wallModal.classList.add("show");
+});
+document.querySelector("#closeWall").addEventListener("click", () => wallModal.classList.remove("show"));
+wallModal.addEventListener("click", (e) => {
+  if (e.target === wallModal) wallModal.classList.remove("show");
 });
 </script>
 </body>
